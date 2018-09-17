@@ -8,16 +8,17 @@ services:
       - "--entrypoints=Name:http Address::80 Redirect.EntryPoint:https"
       - "--entrypoints=Name:https Address::443 TLS"
       - "--defaultentrypoints=http,https"
+      - "--InsecureSkipVerify=true"
       - "--acme"
       - "--acme.storage=traefik/acme/account"
       - "--acme.entryPoint=https"
       - "--acme.httpChallenge.entryPoint=http"
       - "--acme.onHostRule=true"
       - "--acme.onDemand=false"
-      - "--acme.email=EMAIL"
+      - "--acme.email=xj.archaeologist@gmail.com"
       - "--docker"
       - "--docker.swarmMode"
-      - "--docker.domain=DOMAIN"
+      - "--docker.domain=cbean.duckdns.org"
       - "--docker.watch"
       - "--consul"
       - "--consul.endpoint=consul:8500"
@@ -52,7 +53,7 @@ services:
         published: 443
         mode: host
       - target: 8080
-        published: 8080
+        published: 8082
         mode: host
     deploy:
       mode: global
@@ -68,7 +69,7 @@ services:
     image: consul
     command: agent -server -bootstrap-expect=1
     volumes:
-      - /mnt/sda3/volumes/consul:/consul/data
+      - consul:/consul/data
     environment:
       - CONSUL_LOCAL_CONFIG={"datacenter":"us_east2","server":true}
       - CONSUL_BIND_INTERFACE=eth0
@@ -82,11 +83,12 @@ services:
         condition: on-failure
     networks:
       - traefik
-
 networks:
   proxy:
     driver: overlay
     external: true
   traefik:
     driver: overlay
-    attachable: true
+    external: true
+volumes:
+  consul:
